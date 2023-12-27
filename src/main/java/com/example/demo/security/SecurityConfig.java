@@ -2,8 +2,8 @@ package com.example.demo.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -16,18 +16,15 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        http.authorizeHttpRequests(request ->
-                 request.requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN").
-                         requestMatchers(HttpMethod.GET,"/api/users/**").hasAnyRole("USER", "ADMIN").
-                         requestMatchers(HttpMethod.GET,"/**").permitAll()
-        ).formLogin(Customizer.withDefaults());
-//        http.httpBasic(Customizer.withDefaults());
-       // http.csrf(csrf ->csrf.disable());
+        http.authorizeHttpRequests(auth-> auth.requestMatchers("/api/**").authenticated().
+                        requestMatchers("/**").permitAll()).
+               formLogin(Customizer.withDefaults());
+        http.csrf(csrf ->csrf.disable());
         return http.build();
     }
 
